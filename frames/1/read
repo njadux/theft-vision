@@ -1,2 +1,2 @@
-When a video is uploaded, the model won't use the entire dataset. Instead, it will extract a random set of 100 frames from that specific video. 
+When a video is uploaded, the model won't use the entire dataset. Instead, it will extract a random set of 200 frames from that specific video. 
 These frames are then passed to the model for prediction, bypassing the need to pre-process the entire dataset.
