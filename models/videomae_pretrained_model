@@ -1,0 +1,139 @@
+# -----------------------------
+# Video Classification: Shop Lifters Dataset with VideoMAE
+# -----------------------------
+
+import os
+import cv2
+import torch
+from torch.utils.data import Dataset, DataLoader, random_split
+from transformers import (
+    VideoMAEForVideoClassification,
+    VideoMAEImageProcessor,   # updated from deprecated FeatureExtractor
+    TrainingArguments,
+    Trainer,
+    EarlyStoppingCallback,
+    TrainerCallback
+)
+
+# -----------------------------
+# Paths & labels
+# -----------------------------
+DATASET_PATH = "./Shop DataSet"
+LABEL_MAP = {
+    "non shop lifters": 0,
+    "shop lifters": 1
+}
+
+# -----------------------------
+# Custom Dataset
+# -----------------------------
+class ShopDataset(Dataset):
+    def __init__(self, dataset_path, label_map, feature_extractor, max_frames=16):
+        self.samples = []
+        self.label_map = label_map
+        self.feature_extractor = feature_extractor
+        self.max_frames = max_frames
+
+        for label_name, label_id in label_map.items():
+            folder = os.path.join(dataset_path, label_name)
+            for video_file in os.listdir(folder):
+                if video_file.endswith((".mp4", ".avi")):
+                    self.samples.append((os.path.join(folder, video_file), label_id))
+
+    def __len__(self):
+        return len(self.samples)
+
+    def __getitem__(self, idx):
+        video_path, label = self.samples[idx]
+        cap = cv2.VideoCapture(video_path)
+        frames = []
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        cap.release()
+
+        # sample max_frames uniformly
+        if len(frames) > self.max_frames:
+            indices = torch.linspace(0, len(frames) - 1, steps=self.max_frames).long()
+            frames = [frames[i] for i in indices]
+
+        inputs = self.feature_extractor(frames, return_tensors="pt")
+        pixel_values = inputs["pixel_values"][0]
+
+        return {"pixel_values": pixel_values, "labels": torch.tensor(label)}
+
+# -----------------------------
+# Feature extractor + model
+# -----------------------------
+feature_extractor = VideoMAEImageProcessor.from_pretrained("MCG-NJU/videomae-base")
+model = VideoMAEForVideoClassification.from_pretrained(
+    "MCG-NJU/videomae-base",
+    num_labels=len(LABEL_MAP)
+)
+
+# -----------------------------
+# Dataset split (80% train, 20% val)
+# -----------------------------
+full_dataset = ShopDataset(DATASET_PATH, LABEL_MAP, feature_extractor)
+train_size = int(0.8 * len(full_dataset))
+val_size = len(full_dataset) - train_size
+train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
+
+# -----------------------------
+# Data collator
+# -----------------------------
+def collate_fn(batch):
+    pixel_values = torch.stack([b["pixel_values"] for b in batch])
+    labels = torch.tensor([b["labels"] for b in batch])
+    return {"pixel_values": pixel_values, "labels": labels}
+
+train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
+val_dataloader = DataLoader(val_dataset, batch_size=2, collate_fn=collate_fn)
+
+# -----------------------------
+# Training arguments
+# -----------------------------
+training_args = TrainingArguments(
+    output_dir="./results",
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
+    learning_rate=5e-5,
+    per_device_train_batch_size=2,
+    per_device_eval_batch_size=2,
+    num_train_epochs=5,
+    logging_dir="./logs",
+    load_best_model_at_end=True,
+    save_total_limit=2,
+)
+
+# -----------------------------
+# Custom logging callback
+# -----------------------------
+class CustomLoggerCallback(TrainerCallback):
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        print(f"📊 Step {state.global_step} - Logs: {logs}")
+
+# -----------------------------
+# Trainer setup
+# -----------------------------
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=val_dataset,
+    tokenizer=feature_extractor,
+    data_collator=collate_fn,
+    callbacks=[
+        EarlyStoppingCallback(early_stopping_patience=2),
+        CustomLoggerCallback()
+    ]
+)
+
+# -----------------------------
+# Train + Evaluate
+# -----------------------------
+trainer.train()
+metrics = trainer.evaluate()
+print("✅ Final Evaluation:", metrics)
