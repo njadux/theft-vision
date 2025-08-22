@@ -54,25 +54,34 @@ It leverages **VideoMAE** (transformer-based video model) for temporal theft rec
 ## 📂 Repository Structure  
 
 theft_vision/
+
+
 │
 ├── shop_dataset/ # Custom dataset (shop filters vs. non-shop filters)
 ├ ├── drive link for dataset
+
 
 ├── flask_resnet18/ # Flask deployment for ResNet-18
 │ ├── app.py
 │ ├── requirements.txt
 │ └── ...
 
+
 ├── models/ # VideoMAE training & fine-tuning code | renet-18 
 │ ├── videomae_pretrained_model.py
 │ ├── renet-18.py
 │ └── ...
 
+
 ├── frames/ # Extracted frames from video data
 
+
 ├── django-resnet18/ # Django project for ResNet-18 deployment
+
 │ ├── manage.py
+
 │ ├── shopfilter/
+
 │ ├── templates/
 │ └── ...
 
