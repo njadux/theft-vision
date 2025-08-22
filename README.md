@@ -52,7 +52,7 @@ It leverages **VideoMAE** (transformer-based video model) for temporal theft rec
 ---
 
 ## 📂 Repository Structure  
-
+“Hey, treat everything inside as code, don’t reformat it.”
 theft_vision/
 │
 ├── shop_dataset/ # Custom dataset (shop filters vs. non-shop filters)
