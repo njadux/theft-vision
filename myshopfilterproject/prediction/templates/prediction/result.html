@@ -1,0 +1,16 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+    <link rel="stylesheet" href="{% static 'prediction/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Prediction Result</h1>
+        <p>The prediction for the video is: <strong>{{ prediction }}</strong></p>
+        <a href="/">Upload another video</a>
+    </div>
+</body>
+</html>
