@@ -1,2 +1,86 @@
-# theft-vision
-End-to-end video theft detection system using VideoMAE and ResNet18. Includes dataset preprocessing, model training, experiment logs, results, and deployment with Flask and Django.
+Theft Vision: AI-Powered Shoplifting Detection
+
+Theft Vision is a deep learning–based video analytics system for detecting theft in retail environments.
+It leverages VideoMAE (transformer-based video model) for temporal theft recognition and ResNet-18 (CNN) for fast image-level detection. The system integrates with Flask and Django for deployment, enabling real-time suspicious activity monitoring.
+
+🏗️ System Architecture
+🔹 Modeling
+
+ResNet-18 (CNN) → Image-level shoplifting detection with fast inference
+
+VideoMAE (Transformer) → Video-based theft recognition
+
+Transfer Learning → Fine-tuned on a custom shoplifting dataset
+
+🔹 Deployment
+
+Flask API → Lightweight backend serving ResNet-18 predictions
+
+Django Web App → ShopFilter project for delivering detection results to the frontend
+
+⚡ Features
+
+✅ Theft detection using CNNs (ResNet-18) and Video Transformers (VideoMAE)
+
+✅ Flask-based REST API for efficient deployment
+
+✅ Django-based web interface for shop filter detection
+
+✅ Preprocessing pipeline: video → frames → processed .pt datasets
+
+✅ Training logs, evaluation results, and reproducibility artifacts included
+
+🛠️ Tech Stack
+
+Deep Learning: PyTorch, Hugging Face Transformers
+
+Models: VideoMAE, ResNet-18
+
+Deployment: Flask, Django
+
+Preprocessing: OpenCV
+
+Dataset: Custom shoplifting dataset
+
+📌 Future Work
+
+Real-time video stream integration
+
+Advanced anomaly detection techniques
+
+📂 Repository Structure
+theft_vision/
+│
+├── shop_dataset/                 # Custom dataset (shop filters vs. non-shop filters)
+│   ├── shop_filters/
+│   └── non_shop_filters/
+│
+├── flask_resnet18/               # Flask deployment for ResNet-18
+│   ├── app.py
+│   ├── requirements.txt
+│   └── ...
+│
+├── videomae-model/               # VideoMAE training & fine-tuning code
+│   ├── videomae_pretrained_model.py
+│   ├── train.py
+│   └── ...
+│
+├── videomae-base-finetuned/      # Fine-tuned VideoMAE model weights
+│
+├── results/                      # Metrics, confusion matrices, evaluation reports
+│
+├── logs/                         # Training and inference logs
+│
+├── frames/                       # Extracted frames from video data
+│
+├── preprocessed/                 # Preprocessed datasets (.pt format)
+│   ├── train.pt
+│   └── val.pt
+│
+├── myshopfilterproject/          # Django project for ResNet-18 deployment
+│   ├── manage.py
+│   ├── shopfilter/
+│   ├── templates/
+│   └── ...
+│
+└── README.md
