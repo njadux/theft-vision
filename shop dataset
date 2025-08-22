@@ -1,0 +1,6 @@
+**Shop Dataset for Theft Detection:**
+The dataset is organized into two folders:
+
+ShopFilters: Videos/images containing shoplifting scenarios.
+
+Non-ShopFilters: Videos/images without shoplifting activity. https://drive.google.com/file/d/1KCKfyIGbQi8a7bIYta3LM8dFStxVzVX-/view
